@@ -2,8 +2,8 @@
 File name: create_save_embeddings.py
 Author: Luigi Saetta
 Date created: 2023-12-14
-Date last modified: 2024-02-05
-Python Version: 3.9
+Date last modified: 2024-03-24
+Python Version: 3.11
 
 Description:
     This module provides the code to create and store embeddings and text
@@ -223,11 +223,8 @@ def save_embeddings_in_db(embeddings, pages_id, connection):
 
         for id, vector in zip(tqdm(pages_id), embeddings):
             # 'f' single precision 'd' double precision
-            if EMBEDDINGS_BITS == 64:
-                input_array = array.array("d", vector)
-            else:
-                # 32 bits
-                input_array = array.array("f", vector)
+            array_type = "d" if EMBEDDINGS_BITS == 64 else "f"
+            input_array = array.array(array_type, vector)
 
             try:
                 # insert single embedding
@@ -292,7 +289,7 @@ def register_book(book_name, connection):
 #
 
 # mark start
-tStart = time.time()
+time_start = time.time()
 
 # Configure logging
 logging.basicConfig(
@@ -329,7 +326,7 @@ embed_model = GenerativeAIEmbeddings(
 # connect to db
 logging.info("Connecting to Oracle DB...")
 
-DSN = DB_HOST_IP + "/" + DB_SERVICE
+DSN = f"{DB_HOST_IP}/{DB_SERVICE}"
 
 with oracledb.connect(user=DB_USER, password=DB_PWD, dsn=DSN) as connection:
     logging.info("Successfully connected to Oracle Database...")
@@ -375,12 +372,12 @@ with oracledb.connect(user=DB_USER, password=DB_PWD, dsn=DSN) as connection:
     # end !!!
     tot_pages = np.sum(np.array(num_pages))
 
-tEla = time.time() - tStart
+time_elapsed = time.time() - time_start
 
 print("")
 print("Processing done !!!")
 print(
     f"We have processed {tot_pages} pages and saved text chunks and embeddings in the DB"
 )
-print(f"Total elapsed time: {round(tEla, 0)} sec.")
+print(f"Total elapsed time: {round(time_elapsed, 0)} sec.")
 print()

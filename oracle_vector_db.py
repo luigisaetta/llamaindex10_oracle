@@ -93,7 +93,7 @@ def optional_tracing(span_name):
             # to set the span kind (avoid unknown)
             span.set_attribute(OPENINFERENCE_SPAN_KIND, "Retriever")
             span.set_attribute(SpanAttributes.TOOL_NAME, "oracle_vector_store")
-            span.set_attribute(SpanAttributes.TOOL_DESCRIPTION, "Oracle DB 23c free")
+            span.set_attribute(SpanAttributes.TOOL_DESCRIPTION, "Oracle DB 23c")
             span.set_status(Status(StatusCode.OK))
 
             yield span

@@ -73,7 +73,7 @@ MAX_CHUNK_SIZE = 1000
 CHUNK_OVERLAP = 100
 
 # choose the Gen Model (Mistral to test Italian)
-# GEN_MODEL = "OCI"
+GEN_MODEL = "OCI"
 
 # GEN_MODEL = "MISTRAL"
 
@@ -81,10 +81,10 @@ CHUNK_OVERLAP = 100
 # GEN_MODEL = "LLAMA"
 
 # for cohere command-r
-GEN_MODEL = "COHERE"
+# GEN_MODEL = "COHERE"
 
 # for retrieval
-TOP_K = 8
+TOP_K = 4
 # reranker
 TOP_N = 3
 
@@ -102,7 +102,7 @@ RERANKER_ID = "ocid1.datasciencemodeldeployment.oc1.eu-frankfurt-1.amaaaaaangenc
 # for chat engine
 CHAT_MODE = "condense_plus_context"
 # cambiato per Cohere command-R
-MEMORY_TOKEN_LIMIT = 5000
+MEMORY_TOKEN_LIMIT = 3000
 
 # bits used to store embeddings
 # possible values: 32 or 64
@@ -113,7 +113,7 @@ EMBEDDINGS_BITS = 64
 # define the method to generate ID
 ID_GEN_METHOD = "HASH"
 
-# Tracing (disabled due to migration to llamaindex10)
+# Tracing
 ADD_PHX_TRACING = False
 PHX_PORT = "7777"
 PHX_HOST = "0.0.0.0"
