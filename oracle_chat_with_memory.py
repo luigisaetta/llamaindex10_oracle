@@ -125,6 +125,7 @@ logger.propagate = False
 
 st.title("Knowledge Assistant with Oracle AI Vector Search")
 
+
 # Added reset button
 st.button("Clear Chat History", on_click=reset_conversation)
 

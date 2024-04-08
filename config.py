@@ -32,24 +32,10 @@ Warnings:
 # INPUT_FILES = ["covid19_treatment_guidelines.pdf"]
 # INPUT_FILES = ["Luigi Saetta-CV-2024.pdf"]
 INPUT_FILES = [
-    "AI Generativa - casi d'uso per industry.pdf",
-    "Build_a_Large_Language_Model_From_scratchv5.pdf",
-    "CurrentEssentialsofMedicine.pdf",
-    "LLMs_in_Production_v3.pdf",
-    "Luigi Saetta-CV-2024.pdf",
-    "Oracle Generative AI-byAI.pdf",
-    "ai-4-italy.pdf",
-    "covid19_treatment_guidelines.pdf",
-    "feynman_vol1.pdf",
-    "gpt-4.pdf",
-    "llama2.pdf",
-    "oracle-database-23c-new-features-guide.pdf",
-    "python4everybody.pdf",
-    "rag_review.pdf",
-    "the-side-effects-of-metformin-a-review.pdf",
+              "coop-fi-marzo2024.pdf"
 ]
 
-VERBOSE = False
+VERBOSE = True
 
 STREAM_CHAT = True
 
@@ -73,7 +59,7 @@ MAX_CHUNK_SIZE = 1000
 CHUNK_OVERLAP = 100
 
 # choose the Gen Model (Mistral to test Italian)
-GEN_MODEL = "OCI"
+# GEN_MODEL = "OCI"
 
 # GEN_MODEL = "MISTRAL"
 
@@ -81,12 +67,16 @@ GEN_MODEL = "OCI"
 # GEN_MODEL = "LLAMA"
 
 # for cohere command-r
-# GEN_MODEL = "COHERE"
+GEN_MODEL = "COHERE"
+
+# for Chere in vLLM
+# GEN_MODEL = "VLLM"
+
 
 # for retrieval
-TOP_K = 4
+TOP_K = 8
 # reranker
-TOP_N = 3
+TOP_N = 4
 
 # for GenAI models
 MAX_TOKENS = 1024
@@ -102,7 +92,7 @@ RERANKER_ID = "ocid1.datasciencemodeldeployment.oc1.eu-frankfurt-1.amaaaaaangenc
 # for chat engine
 CHAT_MODE = "condense_plus_context"
 # cambiato per Cohere command-R
-MEMORY_TOKEN_LIMIT = 3000
+MEMORY_TOKEN_LIMIT = 6000
 
 # bits used to store embeddings
 # possible values: 32 or 64

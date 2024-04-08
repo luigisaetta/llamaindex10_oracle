@@ -41,6 +41,7 @@ from llama_index.core import Settings
 from llama_index.core.callbacks import CallbackManager, TokenCountingHandler
 
 # integrations
+from llama_index.llms.openai_like import OpenAILike
 from llama_index.llms.mistralai import MistralAI
 from llama_index.llms.cohere import Cohere
 from llama_index.postprocessor.cohere_rerank import CohereRerank
@@ -121,16 +122,30 @@ def create_cohere_llm():
 def create_mistral_llm():
     llm = MistralAI(
         api_key=MISTRAL_API_KEY,
-        model="mistral-small",
+        model="mistral-large-latest",
         temperature=TEMPERATURE,
         max_tokens=MAX_TOKENS,
     )
     return llm
 
 
+# to call a model deployed on VM as VLLM
+def create_openai_compatible():
+    # "mistralai/Mistral-7B-Instruct-v0.2"
+    llm = OpenAILike(
+        model="CohereForAI/c4ai-command-r-v01",
+        api_base="http://141.147.55.249:8888/v1/",
+        api_key="token-abc123",
+        max_tokens=MAX_TOKENS,
+        temperature=TEMPERATURE,
+    )
+
+    return llm
+
+
 def create_llm(auth=None):
     # this check is to avoid mistakes in config.py
-    model_list = ["OCI", "LLAMA", "MISTRAL", "COHERE"]
+    model_list = ["OCI", "LLAMA", "MISTRAL", "COHERE", "VLLM"]
 
     if GEN_MODEL not in model_list:
         raise ValueError(
@@ -167,6 +182,9 @@ def create_llm(auth=None):
     # 16/03 added Cohere command r
     if GEN_MODEL == "COHERE":
         llm = create_cohere_llm()
+
+    if GEN_MODEL == "VLLM":
+        llm = create_openai_compatible()
 
     assert llm is not None
 
@@ -246,7 +264,7 @@ def create_chat_engine(token_counter=None, verbose=False):
 
     # this is the custom class to access Oracle DB as Vectore Store
     vector_store = OracleVectorStore(
-        verbose=VERBOSE,
+        verbose=verbose,
         # if LA2_ENABLE_INDEX is true, add the approximate clause to the query
         # needs AI Vector Search LA2
         enable_hnsw_indexes=LA2_ENABLE_INDEX,
@@ -288,7 +306,7 @@ def create_chat_engine(token_counter=None, verbose=False):
     chat_engine = index.as_chat_engine(
         chat_mode=CHAT_MODE,
         memory=memory,
-        verbose=VERBOSE,
+        verbose=verbose,
         similarity_top_k=TOP_K,
         node_postprocessors=node_postprocessors,
         # to enable streaming the output
