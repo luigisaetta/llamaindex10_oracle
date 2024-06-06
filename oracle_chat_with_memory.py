@@ -25,6 +25,7 @@ Warnings:
 
 import logging
 import time
+import traceback
 import streamlit as st
 
 # to use the create_query_engine
@@ -39,6 +40,9 @@ from config import ADD_REFERENCES, STREAM_CHAT, VERBOSE
 
 # when push the button
 def reset_conversation():
+    """
+    reset the chat history
+    """
     st.session_state.messages = []
 
     # stored in the session to enable reset
@@ -56,6 +60,10 @@ def reset_conversation():
 # cause we need here to use @cache
 @st.cache_resource
 def create_chat_engine(verbose=False):
+    """ "
+    function to create the chat engine
+    local function here to enable caching
+    """
     chat_engine, token_counter = prepare_chain_4_chat.create_chat_engine(
         verbose=verbose
     )
@@ -66,6 +74,9 @@ def create_chat_engine(verbose=False):
 
 # case no streaming: to format output with references
 def no_stream_output(response):
+    """
+    prepare the output in caso of no_stream
+    """
     output = response.response
 
     if ADD_REFERENCES and len(response.source_nodes) > 0:
@@ -81,6 +92,9 @@ def no_stream_output(response):
 
 # case streaming
 def stream_output(response):
+    """
+    prepare the output in caso of streaming
+    """
     # stream the words as soon they arrive
     text_placeholder = st.empty()
     output = ""
@@ -123,7 +137,8 @@ if not logger.handlers:
 
 logger.propagate = False
 
-st.title("Knowledge Assistant with Oracle AI Vector Search")
+# st.title("Knowledge Assistant with Oracle AI Vector Search")
+st.title("Assistente IA per ...")
 
 
 # Added reset button
@@ -152,7 +167,7 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # React to user input
-if question := st.chat_input("Hello, how can I help you?"):
+if question := st.chat_input("Ciao, come posso aiutarti?"):
     # Display user message in chat message container
     st.chat_message("user").markdown(question)
     # Add user message to chat history
@@ -204,4 +219,6 @@ if question := st.chat_input("Hello, how can I help you?"):
 
     except Exception as e:
         logger.error("An error occurred: " + str(e))
+        stack_trace = traceback.format_exc()
+        logger.error(stack_trace)
         st.error("An error occurred: " + str(e))

@@ -30,10 +30,13 @@ Warnings:
 """
 
 import time
-from tqdm import tqdm
+import logging
+
 import array
 from typing import List, Any, Dict
 from contextlib import contextmanager
+from tqdm import tqdm
+import oracledb
 
 from llama_index.core.vector_stores.types import (
     VectorStore,
@@ -44,8 +47,6 @@ from llama_index.core.vector_stores.types import (
 
 from llama_index.core.schema import TextNode, BaseNode
 
-import oracledb
-import logging
 
 # load configs from here
 from config_private import DB_USER, DB_PWD, DB_HOST_IP, DB_SERVICE
@@ -57,11 +58,11 @@ from config import EMBEDDINGS_BITS, ADD_PHX_TRACING
 # Phoenix tracing
 if ADD_PHX_TRACING:
     from opentelemetry import trace as trace_api
+    from opentelemetry.trace import Status, StatusCode
     from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
     from opentelemetry.sdk import trace as trace_sdk
     from opentelemetry.sdk.trace.export import SimpleSpanProcessor
     from openinference.semconv.trace import SpanAttributes
-    from opentelemetry.trace import Status, StatusCode
 
 
 logger = logging.getLogger("ConsoleLogger")
@@ -72,10 +73,13 @@ logger = logging.getLogger("ConsoleLogger")
 tracer = None
 
 if ADD_PHX_TRACING:
-    endpoint = "http://127.0.0.1:7777/v1/traces"
+    # local app
+    TRACING_ENDPOINT = "http://127.0.0.1:7777/v1/traces"
     tracer_provider = trace_sdk.TracerProvider()
     trace_api.set_tracer_provider(tracer_provider)
-    tracer_provider.add_span_processor(SimpleSpanProcessor(OTLPSpanExporter(endpoint)))
+    tracer_provider.add_span_processor(
+        SimpleSpanProcessor(OTLPSpanExporter(TRACING_ENDPOINT))
+    )
     tracer = trace_api.get_tracer(__name__)
     OPENINFERENCE_SPAN_KIND = "openinference.span.kind"
 
@@ -88,6 +92,9 @@ if ADD_PHX_TRACING:
 # added to handle the tracing in oracle_query
 @contextmanager
 def optional_tracing(span_name):
+    """
+    enable tracing using Phoenix traces
+    """
     if ADD_PHX_TRACING:
         with tracer.start_as_current_span(name=span_name) as span:
             # to set the span kind (avoid unknown)
@@ -106,18 +113,23 @@ def oracle_query(
     embed_query: List[float], top_k: int = 2, verbose=False, approximate=False
 ):
     """
-    Executes a query against an Oracle database to find the top_k closest vectors to the given embedding.
+    Executes a query against an Oracle database to find the top_k closest
+    vectors to the given embedding.
 
     History:
         23/12/2023: modified to return some metadata (book_name, page_num)
         05/03 added approximate to support approximate (index) query
     Args:
-        embed_query (List[float]): A list of floats representing the query vector embedding.
-        top_k (int, optional): The number of closest vectors to retrieve. Defaults to 2.
-        verbose (bool, optional): If set to True, additional information about the query and execution time will be printed. Defaults to False.
+        embed_query (List[float]): A list of floats representing
+        the query vector embedding.
+        top_k (int, optional): The number of closest vectors
+        to retrieve. Defaults to 2.
+        verbose (bool, optional): If set to True, additional information
+        about the query and execution time will be printed. Defaults to False.
 
     Returns:
-        VectorStoreQueryResult: Object containing the query results, including nodes, similarities, and ids.
+        VectorStoreQueryResult: Object containing the query results,
+        including nodes, similarities, and ids.
     """
     start_time = time.time()
 
@@ -138,7 +150,7 @@ def oracle_query(
 
                 # changed select adding books (39/12/2023)
                 # changed distance to COSINE
-                select = f"""select V.id, C.CHUNK, C.PAGE_NUM, 
+                select = f"""select V.id, C.CHUNK, C.PAGE_NUM,
                             VECTOR_DISTANCE(V.VEC, :1, COSINE) as d,
                             B.NAME 
                             from VECTORS V, CHUNKS C, BOOKS B
@@ -188,10 +200,14 @@ def oracle_query(
 
 
 def save_embeddings_in_db(embeddings, pages_id, connection):
+    """
+    save the embeddings vector in Oracle DB
+    pages_id: list with page numbers to save as metadata
+    """
     tot_errors = 0
 
     with connection.cursor() as cursor:
-        logger.info("Saving embeddings to DB...")
+        logging.info("Saving embeddings to DB...")
 
         for id, vector in zip(tqdm(pages_id), embeddings):
             # 'f' single precision 'd' double precision
@@ -202,14 +218,17 @@ def save_embeddings_in_db(embeddings, pages_id, connection):
                 # insert single embedding
                 cursor.execute("insert into VECTORS values (:1, :2)", [id, input_array])
             except Exception as e:
-                logger.error("Error in save embeddings...")
-                logger.error(e)
+                logging.error("Error in save embeddings...")
+                logging.error(e)
                 tot_errors += 1
 
-    logger.info(f"Tot. errors in save_embeddings: {tot_errors}")
+    logging.info(f"Tot. errors in save_embeddings: {tot_errors}")
 
 
 def save_chunks_in_db(pages_text, pages_id, pages_num, book_id, connection):
+    """
+    Save the chunks of text in the DB
+    """
     tot_errors = 0
 
     with connection.cursor() as cursor:

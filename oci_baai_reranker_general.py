@@ -92,7 +92,9 @@ class OCIBAAIRerankerGeneral:
 
         try:
             # here we invoke the deployment
-            response = requests.post(self.endpoint, json=body, auth=self.auth["signer"])
+            response = requests.post(
+                self.endpoint, json=body, auth=self.auth["signer"], timeout=30
+            )
 
             # check if HTTP status is OK
             if response.status_code == 200:

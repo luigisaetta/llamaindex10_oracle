@@ -27,15 +27,31 @@ Warnings:
 """
 
 # the book we're going to split and embed
-# INPUT_FILES = ["./ambrosetti.pdf"]
-# INPUT_FILES = ["AI Generativa - casi d'uso per industry.pdf"]
-# INPUT_FILES = ["covid19_treatment_guidelines.pdf"]
-# INPUT_FILES = ["Luigi Saetta-CV-2024.pdf"]
 INPUT_FILES = [
-              "coop-fi-marzo2024.pdf"
+    "AI Generativa - casi d'uso per industry.pdf",
+    "CurrentEssentialsofMedicine.pdf",
+    "Il conto corrente in parole semplici.pdf",
+    "La storia del Gruppo-iccrea.pdf",
+    "La_Centrale_dei_Rischi_in_parole_semplici.pdf",
+    "Luigi Saetta-CV-2024.pdf",
+    "Oracle Generative AI-byAI.pdf",
+    "ai-4-italy.pdf",
+    "coop-fi-aprile2024.pdf",
+    "coop-fi-marzo2024.pdf",
+    "covid19_treatment_guidelines.pdf",
+    "database-concepts.pdf",
+    "database-security-assessment-tool-user-guide_3.1.pdf",
+    "feynman_vol1.pdf",
+    "gpt-4.pdf",
+    "high-availability-23c.pdf",
+    "llama2.pdf",
+    "oracle-database-23c-new-features-guide.pdf",
+    "python4everybody.pdf",
+    "rag_review.pdf",
+    "the-side-effects-of-metformin-a-review.pdf",
 ]
 
-VERBOSE = True
+VERBOSE = False
 
 STREAM_CHAT = True
 
@@ -55,21 +71,21 @@ TOKENIZER = "Cohere/Cohere-embed-multilingual-v3.0"
 # modified 05/02/2024
 ENABLE_CHUNKING = True
 # set to 1000
-MAX_CHUNK_SIZE = 1000
+MAX_CHUNK_SIZE = 1600
 CHUNK_OVERLAP = 100
 
-# choose the Gen Model (Mistral to test Italian)
-# GEN_MODEL = "OCI"
+# choose the Gen Model
+GEN_MODEL = "OCI"
 
 # GEN_MODEL = "MISTRAL"
 
 # must be LLAMA and not LLAMA2
 # GEN_MODEL = "LLAMA"
 
-# for cohere command-r
-GEN_MODEL = "COHERE"
+# for command-r in Cohere API
+# GEN_MODEL = "COHERE"
 
-# for Chere in vLLM
+# for Cohere in vLLM
 # GEN_MODEL = "VLLM"
 
 
@@ -92,7 +108,7 @@ RERANKER_ID = "ocid1.datasciencemodeldeployment.oc1.eu-frankfurt-1.amaaaaaangenc
 # for chat engine
 CHAT_MODE = "condense_plus_context"
 # cambiato per Cohere command-R
-MEMORY_TOKEN_LIMIT = 6000
+MEMORY_TOKEN_LIMIT = 10000
 
 # bits used to store embeddings
 # possible values: 32 or 64
@@ -104,7 +120,7 @@ EMBEDDINGS_BITS = 64
 ID_GEN_METHOD = "HASH"
 
 # Tracing
-ADD_PHX_TRACING = False
+ADD_PHX_TRACING = True
 PHX_PORT = "7777"
 PHX_HOST = "0.0.0.0"
 

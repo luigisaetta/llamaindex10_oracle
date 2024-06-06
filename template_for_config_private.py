@@ -1,3 +1,7 @@
+"""
+template for config_private.py
+"""
+
 # to connect to Oracle DB EE in oraseemea
 DB_USER = "vector"
 DB_PWD = "xyz"

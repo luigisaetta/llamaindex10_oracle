@@ -43,6 +43,9 @@ logger = logging.getLogger("ConsoleLogger")
 
 
 def load_oci_config():
+    """
+    todo
+    """
     # read OCI config to connect to OCI with API key
 
     # are you using default profile?
@@ -52,25 +55,32 @@ def load_oci_config():
 
 
 def print_configuration():
+    """
+    todo
+    """
     logger.info("------------------------")
     logger.info("Configuration used:")
     logger.info(f"{EMBED_MODEL_TYPE} {EMBED_MODEL} for embeddings...")
     logger.info("Using Oracle AI Vector Search...")
     logger.info(f"Using {GEN_MODEL} as LLM...")
     logger.info("Retrieval parameters:")
-    logger.info(f"TOP_K: {TOP_K}")
+    logger.info("TOP_K: %s", TOP_K)
 
     if ADD_RERANKER:
-        logger.info(f"Using {RERANKER_MODEL} as reranker...")
-        logger.info(f"TOP_N: {TOP_N}")
+        logger.info("Using %s as reranker...", RERANKER_MODEL)
+        logger.info("TOP_N: %s", TOP_N)
+
     if ADD_PHX_TRACING:
-        logger.info(f"Enabled observability with Phoenix tracing...")
+        logger.info("Enabled observability with Phoenix tracing...")
 
     logger.info("------------------------")
     logger.info("")
 
 
 def pretty_print_docs(docs):
+    """
+    todo
+    """
     print(
         f"\n{'-' * 100}\n".join(
             [f"Document {i+1}:\n\n" + d.page_content for i, d in enumerate(docs)]
@@ -79,4 +89,17 @@ def pretty_print_docs(docs):
 
 
 def format_docs(docs):
+    """
+    todo
+    """
     return "\n\n".join(doc.page_content for doc in docs)
+
+
+def check_value_in_list(value, values_list):
+    """
+    to check that we don't enter a not supported value
+    """
+    if value not in values_list:
+        raise ValueError(
+            f"Value {value} is not valid: value must be in list {values_list}"
+        )

@@ -30,13 +30,13 @@ Warnings:
 import logging
 import re
 from typing import List
-from tqdm import tqdm
-import array
 import numpy as np
 import time
 
 # to generate id from text
 import hashlib
+
+from tqdm import tqdm
 
 from llama_index.core import SimpleDirectoryReader
 from llama_index.core.node_parser import SentenceSplitter
@@ -44,12 +44,12 @@ from llama_index.core.node_parser import SentenceSplitter
 import oracledb
 import ads
 
-from tokenizers import Tokenizer
 
 # This is the wrapper for GenAI Embeddings
 from ads.llm import GenerativeAIEmbeddings
 
 from oci_utils import load_oci_config
+from oracle_vector_db import save_embeddings_in_db
 
 # this way we don't show & share
 from config_private import (
@@ -67,8 +67,6 @@ from config_private import (
 from config import (
     INPUT_FILES,
     EMBED_MODEL,
-    TOKENIZER,
-    EMBEDDINGS_BITS,
     ID_GEN_METHOD,
     ENABLE_CHUNKING,
     MAX_CHUNK_SIZE,
@@ -105,6 +103,9 @@ def generate_id(nodes_list: List):
 
 
 def read_and_split_in_pages(input_files):
+    """
+    read the content of a set of pdf files and split in chunks
+    """
     pages = SimpleDirectoryReader(input_files=input_files).load_data()
 
     logging.info(f"Read total {len(pages)} pages...")
@@ -133,6 +134,9 @@ def read_and_split_in_pages(input_files):
 
 # in case chunking is enabled
 def read_and_split_in_chunks(input_files):
+    """
+    read a set of pdf files and split in chunks
+    """
     node_parser = SentenceSplitter(
         chunk_size=MAX_CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP
     )
@@ -164,8 +168,10 @@ def read_and_split_in_chunks(input_files):
 
 
 # some simple text preprocessing
-# TODO: this function must be customized to fit your pdf
 def preprocess_text(text):
+    """
+    adds some preprocessing, to be customized !
+    """
     text = text.replace("\t", " ")
     text = text.replace(" -\n", "")
     text = text.replace("-\n", "")
@@ -179,6 +185,9 @@ def preprocess_text(text):
 
 # remove pages with num words < threshold
 def remove_short_pages(pages, threshold):
+    """
+    remove pages with < threshold chars
+    """
     n_removed = 0
     for pag in pages:
         if len(pag.text.split(" ")) < threshold:
@@ -202,7 +211,9 @@ def check_tokenization_length(tokenizer, batch):
 
 # take the list of txts and return a list of embeddings vector
 def compute_embeddings(embed_model, nodes_text):
-    cohere_tokenizer = Tokenizer.from_pretrained(TOKENIZER)
+    """
+    compute embeddings in batch
+    """
     embeddings = []
     for i in tqdm(range(0, len(nodes_text), BATCH_SIZE)):
         batch = nodes_text[i : i + BATCH_SIZE]
@@ -213,28 +224,6 @@ def compute_embeddings(embed_model, nodes_text):
         embeddings.extend(embeddings_batch)
 
     return embeddings
-
-
-def save_embeddings_in_db(embeddings, pages_id, connection):
-    tot_errors = 0
-
-    with connection.cursor() as cursor:
-        logging.info("Saving embeddings to DB...")
-
-        for id, vector in zip(tqdm(pages_id), embeddings):
-            # 'f' single precision 'd' double precision
-            array_type = "d" if EMBEDDINGS_BITS == 64 else "f"
-            input_array = array.array(array_type, vector)
-
-            try:
-                # insert single embedding
-                cursor.execute("insert into VECTORS values (:1, :2)", [id, input_array])
-            except Exception as e:
-                logging.error("Error in save embeddings...")
-                logging.error(e)
-                tot_errors += 1
-
-    logging.info(f"Tot. errors in save_embeddings: {tot_errors}")
 
 
 # this function is called once for each book
@@ -335,7 +324,7 @@ with oracledb.connect(user=DB_USER, password=DB_PWD, dsn=DSN) as connection:
     for book in INPUT_FILES:
         logging.info(f"Processing book: {book}...")
 
-        if ENABLE_CHUNKING == False:
+        if ENABLE_CHUNKING is False:
             # chunks are pages
             logging.info("Chunks are pages of the book...")
             nodes_text, nodes_id, pages_num = read_and_split_in_pages([book])

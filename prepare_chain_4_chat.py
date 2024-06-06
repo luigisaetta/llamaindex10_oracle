@@ -2,7 +2,7 @@
 File name: prepare_chain_4_chat.py
 Author: Luigi Saetta
 Date created: 2023-12-04
-Date last modified: 2024-03-23
+Date last modified: 2024-05-11
 Python Version: 3.11
 
 Description:
@@ -45,6 +45,7 @@ from llama_index.llms.openai_like import OpenAILike
 from llama_index.llms.mistralai import MistralAI
 from llama_index.llms.cohere import Cohere
 from llama_index.postprocessor.cohere_rerank import CohereRerank
+from llama_index.llms.oci_genai import OCIGenAI
 
 from llama_index.core.memory import ChatMemoryBuffer
 
@@ -52,7 +53,7 @@ from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.core.callbacks.global_handlers import set_global_handler
 
 import ads
-from ads.llm import GenerativeAIEmbeddings, GenerativeAI
+from ads.llm import GenerativeAIEmbeddings
 
 # COHERE_KEY is used for reranker, LLM
 # MISTRAL_KEY for LLM
@@ -85,7 +86,7 @@ from config import (
     STREAM_CHAT,
 )
 
-from oci_utils import load_oci_config, print_configuration
+from oci_utils import load_oci_config, print_configuration, check_value_in_list
 from oracle_vector_db import OracleVectorStore
 
 from oci_baai_reranker import OCIBAAIReranker
@@ -110,6 +111,9 @@ if ADD_PHX_TRACING:
 # for now: OCI, LLAMA2 70 B, MISTRAL, COMMAND-R
 #
 def create_cohere_llm():
+    """
+    create the client for Cohere command-r
+    """
     llm = Cohere(
         model="command-r",
         api_key=COHERE_API_KEY,
@@ -120,6 +124,9 @@ def create_cohere_llm():
 
 
 def create_mistral_llm():
+    """
+    create the client for Mistral large
+    """
     llm = MistralAI(
         api_key=MISTRAL_API_KEY,
         model="mistral-large-latest",
@@ -131,6 +138,9 @@ def create_mistral_llm():
 
 # to call a model deployed on VM as VLLM
 def create_openai_compatible():
+    """ "
+    client for a vLLM model
+    """
     # "mistralai/Mistral-7B-Instruct-v0.2"
     llm = OpenAILike(
         model="CohereForAI/c4ai-command-r-v01",
@@ -144,13 +154,14 @@ def create_openai_compatible():
 
 
 def create_llm(auth=None):
+    """ "
+    todo
+    """
     # this check is to avoid mistakes in config.py
+    # here LLAMA is LLAMA2 on OCI
     model_list = ["OCI", "LLAMA", "MISTRAL", "COHERE", "VLLM"]
 
-    if GEN_MODEL not in model_list:
-        raise ValueError(
-            f"The value {GEN_MODEL} is not supported. Choose a value in {model_list} for the GenAI model."
-        )
+    check_value_in_list(GEN_MODEL, model_list)
 
     llm = None
 
@@ -158,23 +169,20 @@ def create_llm(auth=None):
         assert auth is not None
 
         common_oci_params = {
-            "auth": auth,
             "compartment_id": COMPARTMENT_OCID,
             "max_tokens": MAX_TOKENS,
             "temperature": TEMPERATURE,
-            "truncate": "END",
-            "client_kwargs": {"service_endpoint": ENDPOINT},
+            "service_endpoint": ENDPOINT,
         }
         if GEN_MODEL == "OCI":
             # these are the name of the models used by OCI GenAI
-            model_name = "cohere.command"
+            # changed 04/06
+            model_name = "cohere.command-r-16k"
+            llm = OCIGenAI(auth_type="API_KEY", model=model_name, **common_oci_params)
         else:
-            model_name = "meta.llama-2-70b-chat"
-
-        llm = GenerativeAI(
-            name=model_name,
-            **common_oci_params,
-        )
+            # LLAMA3, changed to use new integration (04/06)
+            model_name = "meta.llama-3-70b-instruct"
+            llm = OCIGenAI(auth_type="API_KEY", model=model_name, **common_oci_params)
 
     if GEN_MODEL == "MISTRAL":
         llm = create_mistral_llm()
@@ -192,12 +200,12 @@ def create_llm(auth=None):
 
 
 def create_reranker(auth=None, verbose=False):
+    """
+    todo
+    """
     model_list = ["COHERE", "OCI_BAAI"]
 
-    if RERANKER_MODEL not in model_list:
-        raise ValueError(
-            f"The value {RERANKER_MODEL} is not supported. Choose a value in {model_list} for the Reranker model."
-        )
+    check_value_in_list(RERANKER_MODEL, model_list)
 
     reranker = None
 
@@ -218,12 +226,12 @@ def create_reranker(auth=None, verbose=False):
 
 
 def create_embedding_model(auth=None):
+    """
+    todo
+    """
     model_list = ["OCI"]
 
-    if EMBED_MODEL_TYPE not in model_list:
-        raise ValueError(
-            f"The value {EMBED_MODEL_TYPE} is not supported. Choose a value in {model_list} for the model."
-        )
+    check_value_in_list(EMBED_MODEL_TYPE, model_list)
 
     embed_model = None
 
@@ -243,6 +251,9 @@ def create_embedding_model(auth=None):
 # the entire chain is built here
 #
 def create_chat_engine(token_counter=None, verbose=False):
+    """
+    Create the entiire RAG chain
+    """
 
     logger.info("Calling create_chat_engine()...")
 
@@ -266,7 +277,7 @@ def create_chat_engine(token_counter=None, verbose=False):
     vector_store = OracleVectorStore(
         verbose=verbose,
         # if LA2_ENABLE_INDEX is true, add the approximate clause to the query
-        # needs AI Vector Search LA2
+        # needs AI Vector Search GA
         enable_hnsw_indexes=LA2_ENABLE_INDEX,
     )
 
@@ -296,7 +307,7 @@ def create_chat_engine(token_counter=None, verbose=False):
 
     # here we could plug a reranker improving the quality
 
-    if ADD_RERANKER == True:
+    if ADD_RERANKER is True:
         reranker = create_reranker(auth=api_keys_config)
 
         node_postprocessors = [reranker]
