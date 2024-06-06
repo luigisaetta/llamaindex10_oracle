@@ -77,10 +77,12 @@ CHUNK_OVERLAP = 100
 # choose the Gen Model
 GEN_MODEL = "OCI"
 
-# GEN_MODEL = "MISTRAL"
+# OCI_GEN_MODEL = "cohere.command-r-16k"
+# for now in ppe
+OCI_GEN_MODEL = "cohere.command-r-plus"
+# OCI_GEN_MODEL = "meta.llama-3-70b-instruct"
 
-# must be LLAMA and not LLAMA2
-# GEN_MODEL = "LLAMA"
+# GEN_MODEL = "MISTRAL"
 
 # for command-r in Cohere API
 # GEN_MODEL = "COHERE"

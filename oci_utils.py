@@ -32,6 +32,7 @@ from config import (
     EMBED_MODEL_TYPE,
     EMBED_MODEL,
     GEN_MODEL,
+    OCI_GEN_MODEL,
     TOP_K,
     ADD_RERANKER,
     RERANKER_MODEL,
@@ -60,18 +61,22 @@ def print_configuration():
     """
     logger.info("------------------------")
     logger.info("Configuration used:")
-    logger.info(f"{EMBED_MODEL_TYPE} {EMBED_MODEL} for embeddings...")
-    logger.info("Using Oracle AI Vector Search...")
-    logger.info(f"Using {GEN_MODEL} as LLM...")
-    logger.info("Retrieval parameters:")
-    logger.info("TOP_K: %s", TOP_K)
+    logger.info(f" {EMBED_MODEL_TYPE} {EMBED_MODEL} for embeddings...")
+    logger.info(" Using Oracle AI Vector Search...")
+    logger.info(" Using %s as LLM...", GEN_MODEL)
+
+    if GEN_MODEL == "OCI":
+        logger.info(" Using %s as OCI model..", OCI_GEN_MODEL)
+
+    logger.info(" Retrieval parameters:")
+    logger.info("  TOP_K: %s", TOP_K)
 
     if ADD_RERANKER:
+        logger.info("  TOP_N: %s", TOP_N)
         logger.info("Using %s as reranker...", RERANKER_MODEL)
-        logger.info("TOP_N: %s", TOP_N)
 
     if ADD_PHX_TRACING:
-        logger.info("Enabled observability with Phoenix tracing...")
+        logger.info(" Enabled observability with Phoenix tracing...")
 
     logger.info("------------------------")
     logger.info("")

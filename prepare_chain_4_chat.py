@@ -45,6 +45,7 @@ from llama_index.llms.openai_like import OpenAILike
 from llama_index.llms.mistralai import MistralAI
 from llama_index.llms.cohere import Cohere
 from llama_index.postprocessor.cohere_rerank import CohereRerank
+from llama_index.embeddings.oci_genai import OCIGenAIEmbeddings
 from llama_index.llms.oci_genai import OCIGenAI
 
 from llama_index.core.memory import ChatMemoryBuffer
@@ -52,12 +53,18 @@ from llama_index.core.memory import ChatMemoryBuffer
 # Phoenix traces
 from llama_index.core.callbacks.global_handlers import set_global_handler
 
+# for reranker if in OCI DS
 import ads
-from ads.llm import GenerativeAIEmbeddings
 
 # COHERE_KEY is used for reranker, LLM
 # MISTRAL_KEY for LLM
-from config_private import COMPARTMENT_OCID, ENDPOINT, MISTRAL_API_KEY, COHERE_API_KEY
+from config_private import (
+    COMPARTMENT_OCID,
+    ENDPOINT,
+    ENDPOINT_EMBED,
+    MISTRAL_API_KEY,
+    COHERE_API_KEY,
+)
 
 #
 # all the configuration is controlled by parameters
@@ -69,6 +76,7 @@ from config import (
     EMBED_MODEL,
     TOKENIZER,
     GEN_MODEL,
+    OCI_GEN_MODEL,
     MAX_TOKENS,
     TEMPERATURE,
     TOP_K,
@@ -153,20 +161,19 @@ def create_openai_compatible():
     return llm
 
 
-def create_llm(auth=None):
+def create_llm():
     """ "
     todo
     """
     # this check is to avoid mistakes in config.py
     # here LLAMA is LLAMA2 on OCI
-    model_list = ["OCI", "LLAMA", "MISTRAL", "COHERE", "VLLM"]
+    model_list = ["OCI", "MISTRAL", "COHERE", "VLLM"]
 
     check_value_in_list(GEN_MODEL, model_list)
 
     llm = None
 
-    if GEN_MODEL in ["OCI", "LLAMA"]:
-        assert auth is not None
+    if GEN_MODEL == "OCI":
 
         common_oci_params = {
             "compartment_id": COMPARTMENT_OCID,
@@ -174,15 +181,10 @@ def create_llm(auth=None):
             "temperature": TEMPERATURE,
             "service_endpoint": ENDPOINT,
         }
-        if GEN_MODEL == "OCI":
-            # these are the name of the models used by OCI GenAI
-            # changed 04/06
-            model_name = "cohere.command-r-16k"
-            llm = OCIGenAI(auth_type="API_KEY", model=model_name, **common_oci_params)
-        else:
-            # LLAMA3, changed to use new integration (04/06)
-            model_name = "meta.llama-3-70b-instruct"
-            llm = OCIGenAI(auth_type="API_KEY", model=model_name, **common_oci_params)
+
+        # these are the name of the models used by OCI GenAI
+        # changed 04/06 when new models arrived
+        llm = OCIGenAI(auth_type="API_KEY", model=OCI_GEN_MODEL, **common_oci_params)
 
     if GEN_MODEL == "MISTRAL":
         llm = create_mistral_llm()
@@ -199,7 +201,7 @@ def create_llm(auth=None):
     return llm
 
 
-def create_reranker(auth=None, verbose=False):
+def create_reranker(auth=None, verbose=VERBOSE):
     """
     todo
     """
@@ -225,7 +227,7 @@ def create_reranker(auth=None, verbose=False):
     return reranker
 
 
-def create_embedding_model(auth=None):
+def create_embedding_model():
     """
     todo
     """
@@ -236,12 +238,12 @@ def create_embedding_model(auth=None):
     embed_model = None
 
     if EMBED_MODEL_TYPE == "OCI":
-        embed_model = GenerativeAIEmbeddings(
-            auth=auth,
-            compartment_id=COMPARTMENT_OCID,
+        embed_model = OCIGenAIEmbeddings(
+            auth_type="API_KEY",
             model=EMBED_MODEL,
+            service_endpoint=ENDPOINT_EMBED,
+            compartment_id=COMPARTMENT_OCID,
             truncate="END",
-            client_kwargs={"service_endpoint": ENDPOINT},
         )
 
     return embed_model
@@ -271,7 +273,7 @@ def create_chat_engine(token_counter=None, verbose=False):
     api_keys_config = ads.auth.api_keys(oci_config)
 
     # this is to embed the question
-    embed_model = create_embedding_model(auth=api_keys_config)
+    embed_model = create_embedding_model()
 
     # this is the custom class to access Oracle DB as Vectore Store
     vector_store = OracleVectorStore(
@@ -282,7 +284,7 @@ def create_chat_engine(token_counter=None, verbose=False):
     )
 
     # this is to access OCI or MISTRAL or Cohere GenAI service
-    llm = create_llm(auth=api_keys_config)
+    llm = create_llm()
 
     # this part has been added to count the total # of tokens
     cohere_tokenizer = Tokenizer.from_pretrained(TOKENIZER)

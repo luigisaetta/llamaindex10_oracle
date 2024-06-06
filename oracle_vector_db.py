@@ -333,7 +333,7 @@ class OracleVectorStore(VectorStore):
             pages_text = []
             pages_num = []
 
-            for key, node in self.node_dict.items():
+            for _, node in self.node_dict.items():
                 pages_id.append(node.id_)
                 pages_text.append(node.text)
                 embeddings.append(node.embedding)
