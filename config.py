@@ -26,30 +26,7 @@ Warnings:
     This module is in development, may change in future versions.
 """
 
-# the book we're going to split and embed
-INPUT_FILES = [
-    "AI Generativa - casi d'uso per industry.pdf",
-    "CurrentEssentialsofMedicine.pdf",
-    "Il conto corrente in parole semplici.pdf",
-    "La storia del Gruppo-iccrea.pdf",
-    "La_Centrale_dei_Rischi_in_parole_semplici.pdf",
-    "Luigi Saetta-CV-2024.pdf",
-    "Oracle Generative AI-byAI.pdf",
-    "ai-4-italy.pdf",
-    "coop-fi-aprile2024.pdf",
-    "coop-fi-marzo2024.pdf",
-    "covid19_treatment_guidelines.pdf",
-    "database-concepts.pdf",
-    "database-security-assessment-tool-user-guide_3.1.pdf",
-    "feynman_vol1.pdf",
-    "gpt-4.pdf",
-    "high-availability-23c.pdf",
-    "llama2.pdf",
-    "oracle-database-23c-new-features-guide.pdf",
-    "python4everybody.pdf",
-    "rag_review.pdf",
-    "the-side-effects-of-metformin-a-review.pdf",
-]
+DIR_BOOKS = "./books"
 
 VERBOSE = False
 
@@ -60,8 +37,6 @@ EMBED_MODEL_TYPE = "OCI"
 # Cohere embeddings model in OCI
 # for multilingual (es: italian) use this one
 EMBED_MODEL = "cohere.embed-multilingual-v3.0"
-# for english use this one
-# EMBED_MODEL = "cohere.embed-english-v3.0"
 
 # used for token counting
 TOKENIZER = "Cohere/Cohere-embed-multilingual-v3.0"
@@ -77,9 +52,8 @@ CHUNK_OVERLAP = 100
 # choose the Gen Model
 GEN_MODEL = "OCI"
 
-# OCI_GEN_MODEL = "cohere.command-r-16k"
-# for now in ppe
-OCI_GEN_MODEL = "cohere.command-r-plus"
+OCI_GEN_MODEL = "cohere.command-r-16k"
+# OCI_GEN_MODEL = "cohere.command-r-plus"
 # OCI_GEN_MODEL = "meta.llama-3-70b-instruct"
 
 # GEN_MODEL = "MISTRAL"

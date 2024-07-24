@@ -30,8 +30,9 @@ Warnings:
 import logging
 import re
 from typing import List
-import numpy as np
 import time
+from glob import glob
+import numpy as np
 
 # to generate id from text
 import hashlib
@@ -65,7 +66,7 @@ from config_private import (
 # Configs
 #
 from config import (
-    INPUT_FILES,
+    DIR_BOOKS,
     EMBED_MODEL,
     ID_GEN_METHOD,
     ENABLE_CHUNKING,
@@ -291,7 +292,10 @@ print("")
 print("List of books to be loaded and indexed:")
 
 # print list of book to be loaded
-for book_name in INPUT_FILES:
+# 24/07 modified
+input_files = glob(DIR_BOOKS + "/*.pdf")
+
+for book_name in input_files:
     print(book_name)
 print("")
 
@@ -321,7 +325,7 @@ with oracledb.connect(user=DB_USER, password=DB_PWD, dsn=DSN) as connection:
     logging.info("Successfully connected to Oracle Database...")
 
     num_pages = []
-    for book in INPUT_FILES:
+    for book in input_files:
         logging.info(f"Processing book: {book}...")
 
         if ENABLE_CHUNKING is False:

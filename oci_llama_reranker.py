@@ -37,7 +37,6 @@ Warnings:
 import time
 from typing import Any, List, Optional
 
-from llama_index.core.bridge.pydantic import Field
 from llama_index.core.callbacks import CBEventType, EventPayload
 from llama_index.core.postprocessor.types import BaseNodePostprocessor
 from llama_index.core.schema import NodeWithScore, QueryBundle
@@ -50,6 +49,10 @@ logging.basicConfig(
 
 
 class OCILLamaReranker(BaseNodePostprocessor):
+    """
+    class to wrap a HF reranker
+    """
+
     # by default use BAAI reranker large, deployed as OCI ODS model
     model: str = "oci_baai_reranker"
     top_n: int = 2
@@ -81,7 +84,7 @@ class OCILLamaReranker(BaseNodePostprocessor):
         nodes: List[NodeWithScore],
         query_bundle: Optional[QueryBundle] = None,
     ) -> List[NodeWithScore]:
-        tStart = time.time()
+        t_start = time.time()
         logging.info("Reranking...")
 
         if query_bundle is None:
@@ -114,7 +117,9 @@ class OCILLamaReranker(BaseNodePostprocessor):
                 new_nodes.append(new_node_with_score)
             event.on_end(payload={EventPayload.NODES: new_nodes})
 
-        tEla = time.time() - tStart
+        t_ela = time.time() - t_start
+
         if self.verbose:
-            logging.info(f"...elapsed time: {round(tEla, 2)} sec.")
+            logging.info("...elapsed time: %s sec.", round(t_ela, 2))
+
         return new_nodes

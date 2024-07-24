@@ -31,7 +31,7 @@ A very good introduction to what **Retrieval Augmented Generation** (RAG) is can
 * How to show references (documents used for the response generation)
 * (30/12/2023) Added reranker implemented as OCI Model Deployment
 * (20/01/2024) Added implementation of Vector Store for LangChain and demo
-* Finding duplicates in the documentation
+* Using vector to find duplicates in the documentation
 * (2/03/2024) Added Phoenix Traces for observability
 * (25/3/2024) This is the code for **LlamaIndex 0.10+**
 
@@ -48,19 +48,9 @@ See the [wiki](https://github.com/luigisaetta/llamaindex_oracle/wiki/Setup-of-th
 
 * You can use the [create_save_embeddings](./create_save_embeddings.py) Python program to load all the data in the Oracle DB schema.
 * You can launch it using the script [load_books](./load_books.sh).
-* The list of files to be loaded is specified in the file config.py
+* Files to be loaded are contained in the dir specified in the file config.py
 
 You need to have pdf files in the same directory.
-
-## Limited Availability
-
-* Oracle **AI Vector Search** (Vector DB) is a new feature in Oracle DB 23c, in **Limited Availability**. 
-
-Customers can easily enter in the LA/Beta program.
-
-To test these functionalities you need to enroll in the LA program and install the proper versions of software libraries.
-
-Code and functionalities can change, as a result of feedbacks from customers.
 
 ## Releases used for the demo
 
@@ -97,13 +87,13 @@ With few changes, you can switch to use any Open Source model. But you need to h
 
 ## Observability
 
-(02/03/2024) Added integration with **Arize Phoenix** (Phoenix traces).
+(02/03/2024) Added integration with **Arize Phoenix** (Phoenix traces). 
 
 To enable tracing you must set ADD_PHX_TRACING = True, in config.py
 
 In case of troubles with installing Phoenix  a quick solution is to disable it.
 
-## Factory methods
+## Factory Methods
 
 In the module **prepare_chain_4_chat** are defined the **factory methods** to create: embeddings, llm, reranker...
 

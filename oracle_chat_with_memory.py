@@ -183,7 +183,7 @@ if question := st.chat_input("Ciao, come posso aiutarti?"):
 
             st.session_state.question_count += 1
             logger.info("")
-            logger.info(f"Question n. {st.session_state.question_count}")
+            logger.info("Question n. %s", st.session_state.question_count)
 
             # added streaming if available
             if STREAM_CHAT:
@@ -194,7 +194,7 @@ if question := st.chat_input("Ciao, come posso aiutarti?"):
             time_elapsed = time.time() - time_start
 
         # count the number of questions done
-        logger.info(f"Elapsed time: {round(time_elapsed, 1)} sec.")
+        logger.info("Elapsed time: %s sec.", round(time_elapsed, 1))
 
         # display num. of input/output token
         # count are incrementals
@@ -218,7 +218,7 @@ if question := st.chat_input("Ciao, come posso aiutarti?"):
         st.session_state.messages.append({"role": "assistant", "content": output})
 
     except Exception as e:
-        logger.error("An error occurred: " + str(e))
+        logger.error("An error occurred: %s", str(e))
         stack_trace = traceback.format_exc()
         logger.error(stack_trace)
         st.error("An error occurred: " + str(e))

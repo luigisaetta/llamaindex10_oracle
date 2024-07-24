@@ -61,7 +61,8 @@ def print_configuration():
     """
     logger.info("------------------------")
     logger.info("Configuration used:")
-    logger.info(f" {EMBED_MODEL_TYPE} {EMBED_MODEL} for embeddings...")
+    model_str = f" {EMBED_MODEL_TYPE} {EMBED_MODEL} for embeddings..."
+    logger.info(model_str)
     logger.info(" Using Oracle AI Vector Search...")
     logger.info(" Using %s as LLM...", GEN_MODEL)
 

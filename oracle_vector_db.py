@@ -70,7 +70,7 @@ logger = logging.getLogger("ConsoleLogger")
 #
 # to add Phoenix tracing
 #
-tracer = None
+TRACER = None
 
 if ADD_PHX_TRACING:
     # local app
@@ -80,7 +80,7 @@ if ADD_PHX_TRACING:
     tracer_provider.add_span_processor(
         SimpleSpanProcessor(OTLPSpanExporter(TRACING_ENDPOINT))
     )
-    tracer = trace_api.get_tracer(__name__)
+    TRACER = trace_api.get_tracer(__name__)
     OPENINFERENCE_SPAN_KIND = "openinference.span.kind"
 
 
@@ -96,7 +96,7 @@ def optional_tracing(span_name):
     enable tracing using Phoenix traces
     """
     if ADD_PHX_TRACING:
-        with tracer.start_as_current_span(name=span_name) as span:
+        with TRACER.start_as_current_span(name=span_name) as span:
             # to set the span kind (avoid unknown)
             span.set_attribute(OPENINFERENCE_SPAN_KIND, "Retriever")
             span.set_attribute(SpanAttributes.TOOL_NAME, "oracle_vector_store")
@@ -134,10 +134,10 @@ def oracle_query(
     start_time = time.time()
 
     # build the DSN from data taken from config.py
-    DSN = f"{DB_HOST_IP}/{DB_SERVICE}"
+    dsn = f"{DB_HOST_IP}/{DB_SERVICE}"
 
     try:
-        with oracledb.connect(user=DB_USER, password=DB_PWD, dsn=DSN) as connection:
+        with oracledb.connect(user=DB_USER, password=DB_PWD, dsn=dsn) as connection:
             with connection.cursor() as cursor:
                 # 'f' single precision 'd' double precision
                 array_type = "d" if EMBEDDINGS_BITS == 64 else "f"
@@ -160,7 +160,7 @@ def oracle_query(
                             FETCH {approx_clause} FIRST {top_k} ROWS ONLY"""
 
                 if verbose:
-                    logger.info(f"SQL Query: {select}")
+                    logger.info("SQL Query: %s", select)
 
                 cursor.execute(select, [array_query])
                 rows = cursor.fetchall()
@@ -184,7 +184,7 @@ def oracle_query(
                     similarities.append(row[3])
 
     except Exception as e:
-        logger.error(f"Error occurred in oracle_query: {e}")
+        logger.error("Error occurred in oracle_query: %s", e)
         return None
 
     q_result = VectorStoreQueryResult(
@@ -194,7 +194,7 @@ def oracle_query(
     elapsed_time = time.time() - start_time
 
     if verbose:
-        logger.info(f"Query duration: {round(elapsed_time, 1)} sec.")
+        logger.info("Query duration: %s sec.", round(elapsed_time, 1))
 
     return q_result
 
@@ -209,20 +209,22 @@ def save_embeddings_in_db(embeddings, pages_id, connection):
     with connection.cursor() as cursor:
         logging.info("Saving embeddings to DB...")
 
-        for id, vector in zip(tqdm(pages_id), embeddings):
+        for page_id, vector in zip(tqdm(pages_id), embeddings):
             # 'f' single precision 'd' double precision
             array_type = "d" if EMBEDDINGS_BITS == 64 else "f"
             input_array = array.array(array_type, vector)
 
             try:
                 # insert single embedding
-                cursor.execute("insert into VECTORS values (:1, :2)", [id, input_array])
+                cursor.execute(
+                    "insert into VECTORS values (:1, :2)", [page_id, input_array]
+                )
             except Exception as e:
                 logging.error("Error in save embeddings...")
                 logging.error(e)
                 tot_errors += 1
 
-    logging.info(f"Tot. errors in save_embeddings: {tot_errors}")
+    logging.info("Tot. errors in save_embeddings: %s", tot_errors)
 
 
 def save_chunks_in_db(pages_text, pages_id, pages_num, book_id, connection):
@@ -235,18 +237,18 @@ def save_chunks_in_db(pages_text, pages_id, pages_num, book_id, connection):
         logger.info("Saving texts to DB...")
         cursor.setinputsizes(None, oracledb.DB_TYPE_CLOB)
 
-        for id, text, page_num in zip(tqdm(pages_id), pages_text, pages_num):
+        for page_id, text, page_num in zip(tqdm(pages_id), pages_text, pages_num):
             try:
                 cursor.execute(
                     "insert into CHUNKS (ID, CHUNK, PAGE_NUM, BOOK_ID) values (:1, :2, :3, :4)",
-                    [id, text, page_num, book_id],
+                    [page_id, text, page_num, book_id],
                 )
             except Exception as e:
                 logger.error("Error in save chunks...")
                 logger.error(e)
                 tot_errors += 1
 
-    logger.info(f"Tot. errors in save_chunks: {tot_errors}")
+    logger.info("Tot. errors in save_chunks: %s", tot_errors)
 
 
 #
@@ -275,6 +277,7 @@ class OracleVectorStore(VectorStore):
     def add(
         self,
         nodes: List[BaseNode],
+        **add_kwargs: Any,
     ) -> List[str]:
         """Add nodes to index."""
         ids_list = []
@@ -288,7 +291,7 @@ class OracleVectorStore(VectorStore):
 
         return ids_list
 
-    def delete(self, node_id: str, **delete_kwargs: Any) -> None:
+    def delete(self, ref_doc_id: str, **delete_kwargs: Any) -> None:
         """
         Delete nodes using with ref_doc_id.
 

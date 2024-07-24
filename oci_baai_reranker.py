@@ -64,7 +64,7 @@ class OCIBAAIReranker:
         logging.info(f"Deployment id: {deployment_id}...")
         logging.info("")
 
-    def _build_body(cls, input_list):
+    def _build_body(self, input_list):
         """
         This method builds the body for the https POST call
         """

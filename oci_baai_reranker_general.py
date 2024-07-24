@@ -34,10 +34,10 @@ Warnings:
     This module is in development, may change in future versions.
 """
 
-import cloudpickle
-import requests
 import base64
 import logging
+import cloudpickle
+import requests
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
