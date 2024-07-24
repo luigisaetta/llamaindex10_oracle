@@ -54,11 +54,11 @@ You need to have pdf files in the same directory.
 
 ## Releases used for the demo
 
-* OCI 2.124.1
+* OCI 2.126.1
 * OCI ADS 2.11.3
-* LangChain >= 0.1.12
-* LangChain Community >= 0.0.28
-* Llama-index >= 0.10
+* LangChain 0.1.12
+* LangChain Community 0.0.28
+* Llama-index 0.1.19
 * Oracle Database 23c (23.4) Enterprise Edition with **AI Vector Search**
 
 You can install a complete Python environment using the instructions in the **Setup* section of the Wiki.
@@ -79,7 +79,7 @@ You can install a complete Python environment using the instructions in the **Se
 
 ## Embeddings
 
-One of the key pieces in a **RAG** solution s the Retrieval module. 
+One of the key pieces in a **RAG** solution is the Retrieval module. 
 To use the **AI DB Vector Store** you need an **Embeddings Model**: a model that does the magic of transforming text in vectors, capturing the content and the semantic of the text.
 The Embeddings Model used in these demos is [Cohere Embeds V3](https://txt.cohere.com/introducing-embed-v3/), provided from **OCI GenAI** service.
 
