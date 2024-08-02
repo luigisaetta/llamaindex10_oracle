@@ -2,11 +2,11 @@
 File name: oracle_vector_db.py
 Author: Luigi Saetta
 Date created: 2023-12-15
-Date last modified: 2024-03-16
+Date last modified: 2024-08-02
 Python Version: 3.11
 
 Description:
-    This module provides the class to integrate Oracle Vector DB 
+    This module provides the class to integrate Oracle AI Vector Search 
     as Vector Store in llama-index
 
 Inspired by:
@@ -309,7 +309,7 @@ class OracleVectorStore(VectorStore):
         """Get nodes for response."""
 
         if self.verbose:
-            logging.info("---> Calling query on DB")
+            logging.info("---> Calling query on DB...")
 
         # added to handle, optionally, Phoenix tracing
         with optional_tracing("oracle_vector_db"):

@@ -2,7 +2,7 @@
 File name: create_save_embeddings.py
 Author: Luigi Saetta
 Date created: 2023-12-14
-Date last modified: 2024-03-24
+Date last modified: 2024-08-02
 Python Version: 3.11
 
 Description:
@@ -32,11 +32,11 @@ import re
 from typing import List
 import time
 from glob import glob
-import numpy as np
 
 # to generate id from text
 import hashlib
 
+import numpy as np
 from tqdm import tqdm
 
 from llama_index.core import SimpleDirectoryReader
@@ -109,7 +109,7 @@ def read_and_split_in_pages(input_files):
     """
     pages = SimpleDirectoryReader(input_files=input_files).load_data()
 
-    logging.info(f"Read total {len(pages)} pages...")
+    logging.info("Read total %s pages...", len(pages))
 
     # preprocess text
     for doc in pages:
@@ -144,7 +144,7 @@ def read_and_split_in_chunks(input_files):
 
     pages = SimpleDirectoryReader(input_files=input_files).load_data()
 
-    logging.info(f"Read total {len(pages)} pages...")
+    logging.info("Read total %s pages...", len(pages))
 
     # preprocess text
     for doc in pages:
@@ -195,7 +195,7 @@ def remove_short_pages(pages, threshold):
             pages.remove(pag)
             n_removed += 1
 
-    logging.info(f"Removed {n_removed} short pages...")
+    logging.info("Removed %s short pages...", n_removed)
 
     return pages
 
@@ -230,6 +230,9 @@ def compute_embeddings(embed_model, nodes_text):
 # this function is called once for each book
 # and saves in DB all the pages of the book + embeddings
 def save_chunks_in_db(pages_text, pages_id, pages_num, book_id, connection):
+    """
+    Save the chunks of text in the DB
+    """
     tot_errors = 0
 
     with connection.cursor() as cursor:
@@ -247,11 +250,14 @@ def save_chunks_in_db(pages_text, pages_id, pages_num, book_id, connection):
                 logging.error(e)
                 tot_errors += 1
 
-    logging.info(f"Tot. errors in save_chunks: {tot_errors}")
+    logging.info("Tot. errors in save_chunks: %s", tot_errors)
 
 
 # with this function every book added to DB is registered with a unique id
 def register_book(book_name, connection):
+    """
+    Register a record with the book_id in the DB
+    """
     with connection.cursor() as cursor:
         # get the new key
         cursor.execute("SELECT MAX(ID) FROM BOOKS")
@@ -326,7 +332,7 @@ with oracledb.connect(user=DB_USER, password=DB_PWD, dsn=DSN) as connection:
 
     num_pages = []
     for book in input_files:
-        logging.info(f"Processing book: {book}...")
+        logging.info("Processing book: %s ...", book)
 
         if ENABLE_CHUNKING is False:
             # chunks are pages
@@ -334,7 +340,7 @@ with oracledb.connect(user=DB_USER, password=DB_PWD, dsn=DSN) as connection:
             nodes_text, nodes_id, pages_num = read_and_split_in_pages([book])
             num_pages.append(len(nodes_text))
         else:
-            logging.info(f"Enabled chunking, chunck_size: {MAX_CHUNK_SIZE}...")
+            logging.info("Enabled chunking, chunck_size: %s ...", MAX_CHUNK_SIZE)
             nodes_text, nodes_id, pages_num = read_and_split_in_chunks([book])
 
         # create embeddings

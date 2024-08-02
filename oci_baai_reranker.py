@@ -45,6 +45,10 @@ logging.basicConfig(
 
 
 class OCIBAAIReranker:
+    """
+    class for custom reranker
+    """
+
     def __init__(self, auth, deployment_id, region="eu-frankfurt-1"):
         """
         auth: to manage OCI auth
@@ -78,6 +82,9 @@ class OCIBAAIReranker:
 
     @classmethod
     def class_name(cls) -> str:
+        """
+        return the class name
+        """
         return "OCIBAAIReranker"
 
     def _compute_score(self, x):
@@ -92,7 +99,9 @@ class OCIBAAIReranker:
 
         try:
             # here we invoke the deployment
-            response = requests.post(self.endpoint, json=body, auth=self.auth["signer"])
+            response = requests.post(
+                self.endpoint, json=body, auth=self.auth["signer"], timeout=60
+            )
 
             # check if HTTP status is OK
             if response.status_code == 200:

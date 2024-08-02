@@ -52,9 +52,9 @@ CHUNK_OVERLAP = 100
 # choose the Gen Model
 GEN_MODEL = "OCI"
 
-OCI_GEN_MODEL = "cohere.command-r-16k"
+# OCI_GEN_MODEL = "cohere.command-r-16k"
 # OCI_GEN_MODEL = "cohere.command-r-plus"
-# OCI_GEN_MODEL = "meta.llama-3-70b-instruct"
+OCI_GEN_MODEL = "meta.llama-3-70b-instruct"
 
 # GEN_MODEL = "MISTRAL"
 
