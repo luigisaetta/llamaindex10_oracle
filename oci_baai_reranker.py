@@ -2,7 +2,7 @@
 File name: oci_baai_reranker.py
 Author: Luigi Saetta
 Date created: 2023-12-30
-Date last modified: 2024-01-02
+Date last modified: 2024-08-03
 Python Version: 3.9
 
 Description:
@@ -34,10 +34,10 @@ Warnings:
     This module is in development, may change in future versions.
 """
 
-import cloudpickle
-import requests
 import base64
 import logging
+import requests
+import cloudpickle
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -60,12 +60,12 @@ class OCIBAAIReranker:
         self.deployment_id = deployment_id
 
         # build the endpoint
-        BASE_URL = f"https://modeldeployment.{region}.oci.customer-oci.com/"
-        self.endpoint = f"{BASE_URL}{self.deployment_id}/predict"
+        base_url = f"https://modeldeployment.{region}.oci.customer-oci.com/"
+        self.endpoint = f"{base_url}{self.deployment_id}/predict"
 
         logging.info("Created OCI reranker client...")
-        logging.info(f"Region: {region}...")
-        logging.info(f"Deployment id: {deployment_id}...")
+        logging.info("Region: %s ...", region)
+        logging.info("Deployment id: %s ...", deployment_id)
         logging.info("")
 
     def _build_body(self, input_list):
@@ -109,7 +109,7 @@ class OCIBAAIReranker:
                 response = response.json()
             else:
                 logging.error(
-                    f"Error in OCIBAAIReranker compute_score: {response.json()}"
+                    "Error in OCIBAAIReranker compute_score: %s", response.json()
                 )
                 return []
 

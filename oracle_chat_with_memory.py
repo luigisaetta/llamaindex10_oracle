@@ -57,7 +57,7 @@ def reset_conversation():
 
 
 # defined here to avoid import of streamlit in other module
-# cause we need here to use @cache
+# Don't use cache anymore... one for session
 @st.cache_resource
 def create_chat_engine(verbose=False):
     """ "
@@ -93,7 +93,7 @@ def no_stream_output(response):
 # case streaming
 def stream_output(response):
     """
-    prepare the output in caso of streaming
+    prepare the output in case of streaming
     """
     # stream the words as soon they arrive
     text_placeholder = st.empty()
@@ -140,15 +140,15 @@ logger.propagate = False
 # st.title("Knowledge Assistant with Oracle AI Vector Search")
 st.title("Assistente IA per ...")
 
-
 # Added reset button
 st.button("Clear Chat History", on_click=reset_conversation)
 
-# Initialize chat history
+# Initialize session, chat history
 if "messages" not in st.session_state:
     reset_conversation()
 
 # init RAG
+# TODO: review init logic
 with st.spinner("Initializing RAG chain..."):
     # I have added the token counter to count token
     # I've done this way because I marked the function with @cache
@@ -170,13 +170,8 @@ for message in st.session_state.messages:
 if question := st.chat_input("Ciao, come posso aiutarti?"):
     # Display user message in chat message container
     st.chat_message("user").markdown(question)
-    # Add user message to chat history
-    st.session_state.messages.append({"role": "user", "content": question})
-
-    # here we call the RAG chain...
 
     try:
-        logger.info("Calling RAG chain..")
 
         with st.spinner("Waiting..."):
             time_start = time.time()
@@ -214,7 +209,8 @@ if question := st.chat_input("Ciao, come posso aiutarti?"):
                 # no streaming
                 output = no_stream_output(response)
 
-        # Add assistant response to chat history
+        # Add used and assistant responses to chat history
+        st.session_state.messages.append({"role": "user", "content": question})
         st.session_state.messages.append({"role": "assistant", "content": output})
 
     except Exception as e:

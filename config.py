@@ -39,7 +39,8 @@ EMBED_MODEL_TYPE = "OCI"
 EMBED_MODEL = "cohere.embed-multilingual-v3.0"
 
 # used for token counting
-TOKENIZER = "Cohere/Cohere-embed-multilingual-v3.0"
+# should be changed accordingly to model for LLM
+TOKENIZER = "CohereForAI/c4ai-command-r-v01"
 
 # to enable splitting pages in chunks
 # in token
@@ -52,9 +53,9 @@ CHUNK_OVERLAP = 100
 # choose the Gen Model
 GEN_MODEL = "OCI"
 
-# OCI_GEN_MODEL = "cohere.command-r-16k"
+OCI_GEN_MODEL = "cohere.command-r-16k"
 # OCI_GEN_MODEL = "cohere.command-r-plus"
-OCI_GEN_MODEL = "meta.llama-3-70b-instruct"
+# OCI_GEN_MODEL = "meta.llama-3-70b-instruct"
 
 # GEN_MODEL = "MISTRAL"
 
@@ -66,9 +67,9 @@ OCI_GEN_MODEL = "meta.llama-3-70b-instruct"
 
 
 # for retrieval
-TOP_K = 8
+TOP_K = 16
 # reranker
-TOP_N = 4
+TOP_N = 8
 
 # for GenAI models
 MAX_TOKENS = 1024

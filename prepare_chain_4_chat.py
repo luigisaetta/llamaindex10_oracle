@@ -2,7 +2,7 @@
 File name: prepare_chain_4_chat.py
 Author: Luigi Saetta
 Date created: 2023-12-04
-Date last modified: 2024-05-11
+Date last modified: 2024-08-02
 Python Version: 3.11
 
 Description:
@@ -42,8 +42,6 @@ from llama_index.core.callbacks import CallbackManager, TokenCountingHandler
 
 # integrations
 from llama_index.llms.openai_like import OpenAILike
-from llama_index.llms.mistralai import MistralAI
-from llama_index.llms.cohere import Cohere
 from llama_index.postprocessor.cohere_rerank import CohereRerank
 from llama_index.embeddings.oci_genai import OCIGenAIEmbeddings
 from llama_index.llms.oci_genai import OCIGenAI
@@ -56,13 +54,11 @@ from llama_index.core.callbacks.global_handlers import set_global_handler
 # for reranker if in OCI DS
 import ads
 
-# COHERE_KEY is used for reranker, LLM
-# MISTRAL_KEY for LLM
+# COHERE_KEY is used for reranker
 from config_private import (
     COMPARTMENT_OCID,
     ENDPOINT,
     ENDPOINT_EMBED,
-    MISTRAL_API_KEY,
     COHERE_API_KEY,
 )
 
@@ -116,32 +112,8 @@ if ADD_PHX_TRACING:
 
 #
 # enables to plug different GEN_MODELS
-# for now: OCI, LLAMA2 70 B, MISTRAL, COMMAND-R
+# for now: OCI
 #
-def create_cohere_llm():
-    """
-    create the client for Cohere command-r
-    """
-    llm = Cohere(
-        model="command-r",
-        api_key=COHERE_API_KEY,
-        temperature=TEMPERATURE,
-        max_tokens=MAX_TOKENS,
-    )
-    return llm
-
-
-def create_mistral_llm():
-    """
-    create the client for Mistral large
-    """
-    llm = MistralAI(
-        api_key=MISTRAL_API_KEY,
-        model="mistral-large-latest",
-        temperature=TEMPERATURE,
-        max_tokens=MAX_TOKENS,
-    )
-    return llm
 
 
 # to call a model deployed on VM as VLLM
@@ -152,8 +124,8 @@ def create_openai_compatible():
     # "mistralai/Mistral-7B-Instruct-v0.2"
     llm = OpenAILike(
         model="CohereForAI/c4ai-command-r-v01",
-        api_base="http://141.147.55.249:8888/v1/",
-        api_key="token-abc123",
+        api_base="http://xxxxx:8888/v1/",
+        api_key="token-xxxx",
         max_tokens=MAX_TOKENS,
         temperature=TEMPERATURE,
     )
@@ -163,11 +135,12 @@ def create_openai_compatible():
 
 def create_llm():
     """ "
-    todo
+    factory method to create the Chat model
+
+    the model is defined by a config params
     """
     # this check is to avoid mistakes in config.py
-    # here LLAMA is LLAMA2 on OCI
-    model_list = ["OCI", "MISTRAL", "COHERE", "VLLM"]
+    model_list = ["OCI", "VLLM"]
 
     check_value_in_list(GEN_MODEL, model_list)
 
@@ -185,13 +158,6 @@ def create_llm():
         # these are the name of the models used by OCI GenAI
         # changed 04/06 when new models arrived
         llm = OCIGenAI(auth_type="API_KEY", model=OCI_GEN_MODEL, **common_oci_params)
-
-    if GEN_MODEL == "MISTRAL":
-        llm = create_mistral_llm()
-
-    # 16/03 added Cohere command r
-    if GEN_MODEL == "COHERE":
-        llm = create_cohere_llm()
 
     if GEN_MODEL == "VLLM":
         llm = create_openai_compatible()

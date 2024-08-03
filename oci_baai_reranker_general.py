@@ -45,6 +45,10 @@ logging.basicConfig(
 
 
 class OCIBAAIRerankerGeneral:
+    """
+    OCIBAAIRerankerGeneral
+    """
+
     def __init__(self, auth, deployment_id, region="eu-frankfurt-1"):
         """
         auth: to manage OCI auth
@@ -56,14 +60,15 @@ class OCIBAAIRerankerGeneral:
         self.deployment_id = deployment_id
 
         # build the endpoint
-        BASE_URL = f"https://modeldeployment.{region}.oci.customer-oci.com/"
-        self.endpoint = f"{BASE_URL}{self.deployment_id}/predict"
+        base_url = f"https://modeldeployment.{region}.oci.customer-oci.com/"
+        self.endpoint = f"{base_url}{self.deployment_id}/predict"
 
         logging.info("Created OCI reranker client...")
-        logging.info(f"Region: {region}...")
-        logging.info(f"Deployment id: {deployment_id}...")
+        logging.info("Region: %s ...", region)
+        logging.info("Deployment id: %s ...", deployment_id)
         logging.info("")
 
+    @classmethod
     def _build_body(cls, input_list):
         """
         This method builds the body for the https POST call
@@ -78,6 +83,9 @@ class OCIBAAIRerankerGeneral:
 
     @classmethod
     def class_name(cls) -> str:
+        """
+        return the class name
+        """
         return "OCIBAAIReranker"
 
     def _compute_score(self, x):
@@ -102,7 +110,7 @@ class OCIBAAIRerankerGeneral:
                 response = response.json()
             else:
                 logging.error(
-                    f"Error in OCIBAAIReranker compute_score: {response.json()}"
+                    "Error in OCIBAAIReranker compute_score: %s", response.json()
                 )
                 return []
 

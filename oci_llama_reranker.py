@@ -34,13 +34,13 @@ Warnings:
     This module is in development, may change in future versions.
 """
 
+import logging
 import time
 from typing import Any, List, Optional
 
 from llama_index.core.callbacks import CBEventType, EventPayload
 from llama_index.core.postprocessor.types import BaseNodePostprocessor
 from llama_index.core.schema import NodeWithScore, QueryBundle
-import logging
 
 # Configure logging
 logging.basicConfig(
