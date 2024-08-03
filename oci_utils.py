@@ -74,7 +74,7 @@ def print_configuration():
 
     if ADD_RERANKER:
         logger.info("  TOP_N: %s", TOP_N)
-        logger.info("Using %s as reranker...", RERANKER_MODEL)
+        logger.info(" Using %s as reranker...", RERANKER_MODEL)
 
     if ADD_PHX_TRACING:
         logger.info(" Enabled observability with Phoenix tracing...")

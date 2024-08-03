@@ -93,8 +93,10 @@ from config import (
 from oci_utils import load_oci_config, print_configuration, check_value_in_list
 from oracle_vector_db import OracleVectorStore
 
-from oci_baai_reranker import OCIBAAIReranker
-from oci_llama_reranker import OCILLamaReranker
+# if to reduce import if using Cohere
+if RERANKER_MODEL == "OCI_BAAI":
+    from oci_baai_reranker import OCIBAAIReranker
+    from oci_llama_reranker import OCILLamaReranker
 
 # logging
 logger = logging.getLogger("ConsoleLogger")
@@ -218,7 +220,7 @@ def create_embedding_model():
 #
 # the entire chain is built here
 #
-def create_chat_engine(token_counter=None, verbose=False):
+def create_chat_engine(token_counter=None, verbose=VERBOSE):
     """
     Create the entiire RAG chain
     """

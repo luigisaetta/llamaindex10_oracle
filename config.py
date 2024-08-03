@@ -26,9 +26,9 @@ Warnings:
     This module is in development, may change in future versions.
 """
 
-DIR_BOOKS = "./books"
-
 VERBOSE = False
+
+DIR_BOOKS = "./books"
 
 STREAM_CHAT = True
 
@@ -46,7 +46,7 @@ TOKENIZER = "CohereForAI/c4ai-command-r-v01"
 # in token
 # modified 05/02/2024
 ENABLE_CHUNKING = True
-# set to 1000
+
 MAX_CHUNK_SIZE = 1600
 CHUNK_OVERLAP = 100
 
@@ -108,3 +108,7 @@ LA2_ENABLE_INDEX = False
 
 # UI
 ADD_REFERENCES = True
+
+# logging
+# doesn't work the count
+SHOW_COUNT_TOKENS = False

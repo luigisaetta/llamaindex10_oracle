@@ -35,7 +35,7 @@ import prepare_chain_4_chat
 #
 # Configs
 #
-from config import ADD_REFERENCES, STREAM_CHAT, VERBOSE
+from config import ADD_REFERENCES, STREAM_CHAT, VERBOSE, SHOW_COUNT_TOKENS
 
 
 # when push the button
@@ -193,11 +193,14 @@ if question := st.chat_input("Ciao, come posso aiutarti?"):
 
         # display num. of input/output token
         # count are incrementals
-        str_token1 = f"LLM Prompt Tokens: {st.session_state.token_counter.prompt_llm_token_count}"
-        str_token2 = f"LLM Completion Tokens: {st.session_state.token_counter.completion_llm_token_count}"
+        if SHOW_COUNT_TOKENS:
+            prompt_token_count = st.session_state.token_counter.prompt_llm_token_count
+            completion_token_count = (
+                st.session_state.token_counter.completion_llm_token_count
+            )
 
-        logger.info(str_token1)
-        logger.info(str_token2)
+            logger.info("LLM Prompt Tokens: %s", prompt_token_count)
+            logger.info("LLM Completion Tokens: %s", completion_token_count)
 
         # Display assistant response in chat message container
         with st.chat_message("assistant"):
