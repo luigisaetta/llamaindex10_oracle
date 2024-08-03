@@ -141,7 +141,7 @@ logger.propagate = False
 st.title("Assistente IA per ...")
 
 # Added reset button
-st.button("Clear Chat History", on_click=reset_conversation)
+st.sidebar.button("Clear Chat History", on_click=reset_conversation)
 
 # Initialize session, chat history
 if "messages" not in st.session_state:
